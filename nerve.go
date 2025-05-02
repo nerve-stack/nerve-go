@@ -60,7 +60,7 @@ func (s *Server) HandleRequest(ctx context.Context, raw []byte) []byte {
 	return mustMarshal(resp)
 }
 
-func MakeEvent(eventName string, data any) []byte {
+func EmitEvent(eventName string, data any) []byte {
 	resp := RPCEvent{
 		JSONRPC: JSONRPCVer,
 		Event:   eventName,
