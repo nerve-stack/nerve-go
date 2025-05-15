@@ -19,15 +19,16 @@ type handler func(ctx context.Context, id json.RawMessage, rawParams json.RawMes
 
 func Register[Params any, Result any](s *Server, method string, fn func(context.Context, *Params) (Result, *RPCError)) {
 	s.handlers[method] = func(ctx context.Context, id json.RawMessage, rawParams json.RawMessage) *RPCResponse {
-		var p *Params
-		if len(rawParams) > 0 {
-			p = new(Params)
-			if err := json.Unmarshal(rawParams, p); err != nil {
-				return makeErrorResponse(id, ErrInvalidParams)
-			}
+		if len(rawParams) == 0 || string(rawParams) == "null" {
+			rawParams = []byte("{}")
 		}
 
-		result, err := fn(ctx, p)
+		var p Params
+		if err := json.Unmarshal(rawParams, &p); err != nil {
+			return makeErrorResponse(id, ErrInvalidParams)
+		}
+
+		result, err := fn(ctx, &p)
 		if err != nil {
 			return makeErrorResponse(id, err)
 		}
